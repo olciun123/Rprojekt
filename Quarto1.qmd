@@ -29,10 +29,16 @@ library(tidyr)
 #usuniecie id wiersza?
  # kolumna room- private, shared
 #typy kolumn zmiana combined_data mutate na factor poza file name 
+#miasta z duzej litery 
+#inne kolumny
+
   
 ```
 
 ## 4. Analiza danych w kolumnach
+``` {r}
+#summary
+```
 
 ## 5. Analiza związków między kolumnami
 
