@@ -1,14 +1,44 @@
 ---
-title: "Quarto123"
+title: "Analiza danych Airbnb"
 format: html
 editor: visual
 ---
 
-## Quarto
+## 1. Wczytanie pakietów
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+```
 
-## Running Code
+## 2. Wczytanie danych
+
+```{r}
+#polaczenie w jedno + head i dim
+#colnames 
+#nazwy plikow w kolumne, dodanie kolumny na weekdays i weekend, usuniecie .csv
+#tibble 
+```
+
+## 3. Analiza i poprawa kolumn
+
+```{r}
+ #dodanie kolumny na weekdays i weekend, usuniecie .csv
+#usuniecie id wiersza?
+ # kolumna room- private, shared
+#typy kolumn zmiana combined_data mutate na factor poza file name 
+  
+```
+
+## 4. Analiza danych w kolumnach
+
+## 5. Analiza związków między kolumnami
+
+## 6. Wnioski
+
+## 7. Prezentacja wyników
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
