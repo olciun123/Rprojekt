@@ -11,6 +11,7 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(tidyr)
+library(readr)
 ```
 
 ## 2. Wczytanie danych
@@ -20,6 +21,26 @@ library(tidyr)
 #colnames 
 #nazwy plikow w kolumne, dodanie kolumny na weekdays i weekend, usuniecie .csv
 #tibble 
+folder_path <- "ścieżka/do/twoich/plików"
+
+# Pobranie listy plików CSV
+csv_files <- list.files(path = folder_path, pattern = "*.csv", full.names = TRUE)
+
+# Wczytanie i scalanie danych
+combined_data <- csv_files %>%
+  lapply(function(file) {
+    data <- read_csv(file)  # Wczytanie danych
+    data$filename <- basename(file)  # Dodanie kolumny z nazwą pliku
+    return(data)
+  }) %>%
+  bind_rows()
+
+# Podgląd danych
+head(combined_data)
+
+# Opcjonalnie: zapisanie scalonych danych do nowego pliku CSV
+write_csv(combined_data, "scalone_dane.csv")
+
 ```
 
 ## 3. Analiza i poprawa kolumn
