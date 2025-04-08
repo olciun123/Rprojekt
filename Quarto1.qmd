@@ -12,6 +12,7 @@ library(ggplot2)
 library(stringr)
 library(tidyr)
 library(readr)
+library(tidyverse)
 ```
 
 ## 2. Wczytanie danych
@@ -21,26 +22,61 @@ library(readr)
 #colnames 
 #nazwy plikow w kolumne, dodanie kolumny na weekdays i weekend, usuniecie .csv
 #tibble 
-folder_path <- "ścieżka/do/twoich/plików"
 
-# Pobranie listy plików CSV
-csv_files <- list.files(path = folder_path, pattern = "*.csv", full.names = TRUE)
+# Ścieżka do folderu z danymi
+folder <- "data"
 
-# Wczytanie i scalanie danych
-combined_data <- csv_files %>%
-  lapply(function(file) {
-    data <- read_csv(file)  # Wczytanie danych
-    data$filename <- basename(file)  # Dodanie kolumny z nazwą pliku
-    return(data)
-  }) %>%
-  bind_rows()
+# Lista plików .csv w folderze
+plik_list <- list.files(path = folder, pattern = "\\.csv$", full.names = TRUE)
 
-# Podgląd danych
-head(combined_data)
+# Wczytanie danych z dodaniem kolumny z nazwą pliku
+dane_list <- lapply(plik_list, function(file) {
+  df <- read.csv(file)
+  df$plik_zrodlowy <- basename(file)  # dodaje tylko nazwę pliku, bez ścieżki
+  return(df)
+})
 
-# Opcjonalnie: zapisanie scalonych danych do nowego pliku CSV
-write_csv(combined_data, "scalone_dane.csv")
+# Połączenie wszystkiego w jeden data frame
+dane_polaczone <- do.call(rbind, dane_list)
 
+```
+
+##b test
+``` {r}
+# Usunięcie rozszerzenia .csv
+dane_polaczone$plik_zrodlowy <- sub("\\.csv$", "", dane_polaczone$plik_zrodlowy)
+
+# Podział na dwie kolumny: miasto i typ
+dane_polaczone[c("miasto", "typ")] <- do.call(rbind, strsplit(dane_polaczone$plik_zrodlowy, "_"))
+
+# (opcjonalnie) Usunięcie starej kolumny z nazwą pliku
+dane_polaczone$plik_zrodlowy <- NULL
+
+```
+
+
+##c test
+``` {r}
+dane_polaczone <- as_tibble(dane_polaczone)
+head(dane_polaczone)
+str(dane_polaczone)
+```
+
+```{r}
+dane_polaczone <- dane_polaczone %>%
+mutate(across(c(room_type, room_shared, room_private, miasto, host_is_superhost, typ), as.factor))
+```
+
+```{r}
+#str(dane_polaczone)
+```
+```{r}
+#
+
+#table(dane_polaczone$miasto)
+
+faktory <- select(dane_polaczone, room_type, room_shared, room_private,host_is_superhost, miasto, typ)
+apply(faktory, 2, function(x) table(x))
 ```
 
 ## 3. Analiza i poprawa kolumn
@@ -57,8 +93,13 @@ write_csv(combined_data, "scalone_dane.csv")
 ```
 
 ## 4. Analiza danych w kolumnach
-``` {r}
+
+```{r}
 #summary
+#hist()
+#table()
+#str()
+#glimpse()
 ```
 
 ## 5. Analiza związków między kolumnami
