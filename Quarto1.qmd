@@ -13,70 +13,76 @@ library(stringr)
 library(tidyr)
 library(readr)
 library(tidyverse)
+library(magrittr)
 ```
 
 ## 2. Wczytanie danych
 
+W danych do projektu znajduje się 20 osobnych plików .csv. Aby zacząć nad nimi pracować należy złączyć je w jeden dataset. Dla dalszej analizy do danych dodajemy dwie kolumny: city i type, które zawierają informacje z nazwy pliku, czyli miasto i pobyt na weekend/ w tygodniu.
+
 ```{r}
-#polaczenie w jedno + head i dim
-#colnames 
-#nazwy plikow w kolumne, dodanie kolumny na weekdays i weekend, usuniecie .csv
-#tibble 
 
-# Ścieżka do folderu z danymi
-folder <- "data"
+# Ścieżka do folderu z plikami
+folder_path <- "Data"  
 
-# Lista plików .csv w folderze
-plik_list <- list.files(path = folder, pattern = "\\.csv$", full.names = TRUE)
+# Pobierz listę plików CSV
+file_list <- list.files(path = folder_path, pattern = "\\.csv$", full.names = TRUE)
 
-# Wczytanie danych z dodaniem kolumny z nazwą pliku
-dane_list <- lapply(plik_list, function(file) {
-  df <- read.csv(file)
-  df$plik_zrodlowy <- basename(file)  # dodaje tylko nazwę pliku, bez ścieżki
+# Funkcja do wczytywania pliku i dodawania kolumn city i type
+read_and_tag <- function(file_path) 
+  {
+  # Wyciągnięcie nazwy pliku bez ścieżki
+  file_name <- basename(file_path)
+  
+  # Ekstrakcja typu (weekdays/weekends)
+  type <- ifelse(str_detect(file_name, "weekends"), "weekends", "weekdays")
+  
+  # Ekstrakcja nazwy miasta (wszystko przed "_weekdays" lub "_weekends")
+  city <- str_remove(file_name, "_week(ends|days)\\.csv")
+  
+  # Wczytanie danych i dodanie kolumn
+  df <- read_csv(file_path) %>%
+    mutate(city = city, type = type)
+  
   return(df)
-})
+}
 
-# Połączenie wszystkiego w jeden data frame
-dane_polaczone <- do.call(rbind, dane_list)
+# Wczytanie i połączenie wszystkich plików
+combined_data <- lapply(file_list, read_and_tag) %>% bind_rows()
 
-```
-
-##b test
-``` {r}
-# Usunięcie rozszerzenia .csv
-dane_polaczone$plik_zrodlowy <- sub("\\.csv$", "", dane_polaczone$plik_zrodlowy)
-
-# Podział na dwie kolumny: miasto i typ
-dane_polaczone[c("miasto", "typ")] <- do.call(rbind, strsplit(dane_polaczone$plik_zrodlowy, "_"))
-
-# (opcjonalnie) Usunięcie starej kolumny z nazwą pliku
-dane_polaczone$plik_zrodlowy <- NULL
+# Zobacz wynik
+head(combined_data)
 
 ```
 
+Zmieniamy dataset na tibble oraz typy niektórych kolumn na factor.
 
-##c test
-``` {r}
-dane_polaczone <- as_tibble(dane_polaczone)
-head(dane_polaczone)
-str(dane_polaczone)
+```{r}
+combined_data <- as_tibble(combined_data)
+
+combined_data <- combined_data %>%
+mutate(across(c(room_type, room_shared, room_private, city, host_is_superhost, type), as.factor))
+
+str(combined_data)
 ```
 
 ```{r}
-dane_polaczone <- dane_polaczone %>%
-mutate(across(c(room_type, room_shared, room_private, miasto, host_is_superhost, typ), as.factor))
-```
-
-```{r}
-#str(dane_polaczone)
-```
-```{r}
-#
-
-#table(dane_polaczone$miasto)
-
-faktory <- select(dane_polaczone, room_type, room_shared, room_private,host_is_superhost, miasto, typ)
+faktory <- select(combined_data, where(is.factor))
 apply(faktory, 2, function(x) table(x))
+```
+
+Usunięcie kolumny z numerami wiersza
+```{r}
+combined_data <- combined_data %>% select(-`...1`)
+
+```
+
+```{r}
+glimpse(combined_data)
+```
+
+```{r}
+
 ```
 
 ## 3. Analiza i poprawa kolumn
