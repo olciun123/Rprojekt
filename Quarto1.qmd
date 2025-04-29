@@ -66,12 +66,91 @@ mutate(across(c(room_type, room_shared, room_private, city, host_is_superhost, t
 
 str(combined_data)
 ```
+Do dalszej analizy używać będziemy tylko kolumny room_type, ponieważ kolumna room_private przedstawia te same dane co room_type, a room_shared uznaje listing entire home/apt jako dzielony pokój. Najlepszy wgląd w dane daje room_type, ponieważ przedstawia podział na prywatny pokój, apartament i dzielony pokój.
 
 ```{r}
 faktory <- select(combined_data, where(is.factor))
 #apply(faktory, 2, function(x) table(x))
 summary(faktory)
 ```
+```{r}
+ggplot(combined_data, aes(x = cleanliness_rating)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(
+    title = "Histogram oceny czystości",
+    x = "Ocena czystości",
+    y = "Liczba obiektów"
+  ) +
+  theme_minimal()
+
+```
+```{r}
+
+
+ggplot(combined_data, aes(x = guest_satisfaction_overall)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(
+    title = "Histogram oceny klientow",
+    x = "Ocena",
+    y = "Liczba obiektów"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+
+
+ggplot(combined_data, aes(x = attr_index_norm)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(
+    title = "attr_index",
+    x = "Ocena",
+    y = "Liczba obiektów"
+  ) +
+  theme_minimal()
+
+```
+
+
+```{r}
+
+
+combined_data %>%
+  group_by(city) %>%
+  summarise(srednia_odl_metro = mean(metro_dist, na.rm = TRUE)) %>%
+  ggplot(aes(x = city, y = srednia_odl_metro)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Średnia odległość od metra",
+    x = "Miasto",
+    y = "Średnia odległość"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+```{r}
+
+
+combined_data %>%
+  group_by(city) %>%
+  summarise(srednia_czystosc = mean(cleanliness_rating, na.rm = TRUE)) %>%
+  ggplot(aes(x = city, y = srednia_czystosc)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Średnia czystosc",
+    x = "Miasto",
+    y = "Średnia czystosc"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
 
 ```{r}
 
@@ -87,11 +166,18 @@ combined_data %>%
 Usunięcie kolumny z numerami wiersza
 ```{r}
 combined_data <- combined_data %>% select(-`...1`)
-
+glimpse(combined_data)
 ```
 
-```{r}
-glimpse(combined_data)
+```{r} 
+#poprawa liter miast na duze
+popraw_city <- function(df) {
+  df %>%
+    mutate(city = str_to_title(city))
+}
+popraw_city(combined_data)
+
+
 ```
 
 ```{r}
@@ -102,6 +188,13 @@ combined_data%>%janitor::tabyl(city, room_type)
 with(combined_data, table(city, type)) %>% as_tibble()%>% 
   ggplot(aes(city, n, fill=type)) + geom_col(position="dodge")
 ```
+
+```{r}
+with(combined_data, table(city, room_type)) %>% as_tibble()%>% 
+  ggplot(aes(city, n, fill=room_type)) + geom_col(position="dodge")
+```
+
+
 
 ## 3. Analiza i poprawa kolumn
 
