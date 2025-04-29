@@ -14,6 +14,7 @@ library(tidyr)
 library(readr)
 library(tidyverse)
 library(magrittr)
+library(janitor)
 ```
 
 ## 2. Wczytanie danych
@@ -68,8 +69,20 @@ str(combined_data)
 
 ```{r}
 faktory <- select(combined_data, where(is.factor))
-apply(faktory, 2, function(x) table(x))
+#apply(faktory, 2, function(x) table(x))
+summary(faktory)
 ```
+
+```{r}
+
+
+combined_data %>%
+  count(city, name = "liczebnosc") %>%
+  mutate(procent = round((liczebnosc/ sum(liczebnosc))*100, 2)) %>%
+  arrange(desc(procent))
+
+```
+
 
 Usunięcie kolumny z numerami wiersza
 ```{r}
@@ -82,7 +95,12 @@ glimpse(combined_data)
 ```
 
 ```{r}
+combined_data%>%janitor::tabyl(city, room_type)
+```
 
+```{r}
+with(combined_data, table(city, type)) %>% as_tibble()%>% 
+  ggplot(aes(city, n, fill=type)) + geom_col(position="dodge")
 ```
 
 ## 3. Analiza i poprawa kolumn
